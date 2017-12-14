@@ -33,3 +33,45 @@ def _save(file_label_list, file_path):
 def mkdir_if_missing(d):
     if not osp.isdir(d):
         os.makedirs(d)
+
+def main(args):
+    # all the filenames
+    images_train = glob(osp.join(args.input_dir, 'bounding_box_train', '*.jpg'))
+    images_query = glob(osp.join(args.input_dir, 'query', '*.jpg'))
+    images_test = glob(osp.join(args.input_dir, 'bounding_box_test', '*.jpg'))
+    print(len(images_train))
+    # train
+    trainval = _get_list(images_train)
+    np.random.shuffle(trainval)
+    # num_val = int(len(trainval) * args.val_ratio)
+    # train = trainval[num_val:]
+    # val = trainval[:num_val]
+    # test
+    test_probe = _get_list(images_query)
+    test_gallery = _get_list(images_test)
+    # Save to files
+    mkdir_if_missing(args.output_dir)
+    # _save(train, osp.join(args.output_dir, 'train.txt'))
+    # _save(val, osp.join(args.output_dir, 'val.txt'))
+    _save(trainval, osp.join(args.output_dir, 'trainval.txt'))
+    _save(test_probe, osp.join(args.output_dir, 'test_probe.txt'))
+    _save(test_gallery, osp.join(args.output_dir, 'test_gallery.txt'))
+
+
+if __name__ == '__main__':
+    parser = ArgumentParser(
+        description="Create lists of image file and label for making lmdbs")
+    parser.add_argument('input_dir',
+                        help="Root directory of the market dataset containing "
+                             " bounding_box_train/" "bounding_box_test/" "query/")
+    parser.add_argument('output_dir',
+                        help="Output directory for the lists")
+    parser.add_argument(
+        '--val-ratio',
+        type=float,
+        default=0.1,
+        help="Ratio between validation and trainval data. Default 0.1.")
+    args = parser.parse_args()
+    main(args)
+
+        
